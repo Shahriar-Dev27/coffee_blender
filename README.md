@@ -99,7 +99,6 @@ See [the verification report](docs/verification.md) for recorded results, their 
 | Change | Start here |
 | --- | --- |
 | Page chapters and editorial copy | `src/app/page.tsx` |
-| Visual direction | [DESIGN.md](DESIGN.md) — the Everyday Ritual source of truth |
 | Colors, typography, responsive composition | `src/styles/tokens.css`, `src/styles/ritual.css` |
 | Drink options, USD pricing, pickup slots | `src/config/catalog.ts` |
 | Presets and compatible combinations | `src/order/recipes.ts` |
@@ -118,4 +117,4 @@ See [the verification report](docs/verification.md) for recorded results, their 
 - Data: only sanitized cart lines persist in browser storage. Prices are recalculated; pickup details are not persisted. Closing or refreshing the session loses the local pickup/receipt state.
 - Commerce: there is no backend order transmission, payment integration, or email delivery. A production service needs server-side validation, authoritative pricing, and appropriate personal-data handling; `src/order/service.ts` is the current demo boundary.
 
-The [production asset checklist](docs/assets/2026-11-06-breou-blender-asset-checklist.md) tracks the separate asset and real-device handoff.
+Final production assets and physical-device approval remain separate from this demo.

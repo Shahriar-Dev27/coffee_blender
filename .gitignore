@@ -49,3 +49,16 @@ next-env.d.ts
 
 # local design specification
 /BREOU Cinematic Coffee Storefront, Design Spec.md
+
+# private planning, specifications, and agent instructions (local only)
+/docs/superpowers/
+/docs/plans/
+/docs/specs/
+/plans/
+/specs/
+/agency/
+/DESIGN.md
+/AGENTS.md
+/CLAUDE.md
+/.cursorrules
+/docs/assets/*checklist*.md

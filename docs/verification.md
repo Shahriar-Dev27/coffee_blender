@@ -51,9 +51,9 @@ Hero, counter, open dialog and mobile compositions were rendered and inspected. 
 
 ## Explicit external gates
 
-- Shipped geometry/captures are procedural implementation assets, not Blender/Cycles production renders. All stage asset records remain marked as placeholders. See the updated production checklist.
+- Shipped geometry/captures are procedural implementation assets, not Blender/Cycles production renders. All stage asset records remain marked as placeholders.
 - Width <=640px or height <=600px currently uses intentional still compositions with full ordering. Enabling live mobile 3D awaits physical-device results.
-- The lettering/silhouette still needs the separate optical brand review requested by DESIGN.md.
+- The lettering/silhouette still needs a separate optical brand review.
 - Physical mid-range Android/iPhone testing and actual browser 200% zoom were not performed. Narrow/reflow browser checks are not presented as those manual checks.
 - Field INP and real-device frame-time compliance are not established by the Lighthouse TBT result.
 - Catalog names, USD prices, pickup slots and copy remain editable demo data. No payment, email, backend order transmission, hosting deployment or publication was performed.
