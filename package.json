@@ -13,8 +13,10 @@
     "test:e2e": "playwright test",
     "assets:check": "tsx scripts/assets/check-assets.ts",
     "stills:capture": "tsx scripts/stills/capture.ts",
-    "fonts:copy": "tsx scripts/fonts/copy.ts",
-    "budget:js": "tsx scripts/perf/check-first-load-js.ts",
+    "fonts:copy": "node scripts/fonts/check.mjs",
+    "fonts:check": "node scripts/fonts/check.mjs",
+    "budget:js": "node scripts/perf/check-first-load-js.mjs",
+    "audit:mobile": "node scripts/perf/audit.mjs",
     "lhci": "lhci autorun"
   },
   "dependencies": {

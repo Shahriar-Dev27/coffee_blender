@@ -1,6 +1,7 @@
 export type Tier = 'high' | 'medium' | 'low';
 
 export interface TierEnv {
+  viewportLimited?: boolean;
   reducedMotion: boolean;
   webgl: boolean;
   coarsePointer: boolean;
@@ -24,7 +25,7 @@ export function initialTier(env: TierEnv): Tier {
     (env.deviceMemory !== undefined && env.deviceMemory <= 2) ||
     env.saveData ||
     (env.hardwareConcurrency !== undefined && env.hardwareConcurrency <= 2);
-  if (env.reducedMotion || !env.webgl || lowEnd) return 'low';
+  if (env.viewportLimited || env.reducedMotion || !env.webgl || lowEnd) return 'low';
   if (env.coarsePointer) return 'medium';
   return 'high';
 }

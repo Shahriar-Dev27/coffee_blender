@@ -38,7 +38,7 @@ export const STAGES: readonly StageDef[] = [
     end: 0.14,
     still: {
       slug: 'cup',
-      alt: 'An empty ceramic cup in close-up on a dark brown ground.',
+      alt: 'A cream BREOU ceramic cup tilted above a milk-paper ground, filled with a leaf-pattern latte.',
       placeholder: true,
       stillProgress: 0.07,
     },
@@ -51,7 +51,7 @@ export const STAGES: readonly StageDef[] = [
     end: 0.34,
     still: {
       slug: 'blend',
-      alt: 'Coffee beans swirling around the empty cup.',
+      alt: 'A restrained arc of coffee beans framing the same cream ceramic cup.',
       placeholder: true,
       stillProgress: 0.26,
     },
@@ -66,7 +66,7 @@ export const STAGES: readonly StageDef[] = [
     end: 0.54,
     still: {
       slug: 'beans-in',
-      alt: 'Beans falling into the cup as espresso forms.',
+      alt: 'A thin stream of espresso pouring into the ceramic cup, with crema forming.',
       placeholder: true,
       stillProgress: 0.5,
     },
@@ -79,7 +79,7 @@ export const STAGES: readonly StageDef[] = [
     end: 0.78,
     still: {
       slug: 'milk',
-      alt: 'Milk pouring into the espresso, with honey beside the cup.',
+      alt: 'The espresso softens with milk and a leaf of latte art forms on its surface.',
       placeholder: true,
       stillProgress: 0.7,
     },
@@ -95,7 +95,7 @@ export const STAGES: readonly StageDef[] = [
     end: 1,
     still: {
       slug: 'final',
-      alt: 'The finished cup with milk, foam and honey.',
+      alt: 'The finished BREOU cup settles onto its cream saucer with a fine cafe-red rim.',
       placeholder: true,
       stillProgress: 1,
     },

@@ -24,6 +24,7 @@ export const BOOT_SCRIPT =
   'n=navigator,c=n.connection,dm=n.deviceMemory,hc=n.hardwareConcurrency,' +
   'k=document.createElement("canvas"),g=null,' +
   'low=m("(prefers-reduced-motion: reduce)")||' +
+  'm("(max-width: 640px)")||m("(max-height: 600px)")||' +
   '(typeof dm==="number"&&dm<=2)||!!(c&&c.saveData)||' +
   '(typeof hc==="number"&&hc<=2)||' +
   '!(g=k.getContext("webgl2")||k.getContext("webgl"));' +

@@ -1,0 +1,16 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["http://127.0.0.1:3100/"],
+      "numberOfRuns": 3,
+      "settings": { "onlyCategories": ["performance", "accessibility"] }
+    },
+    "assert": {
+      "assertions": {
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }]
+      }
+    },
+    "upload": { "target": "filesystem", "outputDir": "art/lhci" }
+  }
+}

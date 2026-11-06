@@ -6,6 +6,7 @@ import { BOOT_SCRIPT } from '@/lib/bootScript';
 import { initialTier, type TierEnv } from '@/lib/tier';
 
 interface Stub {
+  viewportLimited?: boolean;
   reducedMotion?: boolean;
   coarsePointer?: boolean;
   webgl?: boolean | 'throw';
@@ -24,7 +25,7 @@ function runWith(stub: Stub): void {
   vi.stubGlobal(
     'matchMedia',
     (q: string) => ({
-      matches: q.includes('prefers-reduced-motion') ? !!stub.reducedMotion : q.includes('pointer: coarse') ? !!stub.coarsePointer : false,
+      matches: q.includes('prefers-reduced-motion') ? !!stub.reducedMotion : q.includes('pointer: coarse') ? !!stub.coarsePointer : q.includes('max-width') ? !!stub.viewportLimited : false,
     }),
   );
   vi.stubGlobal('navigator', {
@@ -54,6 +55,11 @@ afterEach(() => {
 });
 
 describe('BOOT_SCRIPT', () => {
+  it('does not create a WebGL context for the intentionally static small viewport', () => {
+    runWith({ viewportLimited: true, webgl: true });
+    expect(html().dataset.tier).toBe('low');
+    expect(getContextSpy).not.toHaveBeenCalled();
+  });
   it('reduced motion: js only, tier low', () => {
     runWith({ reducedMotion: true, webgl: true });
     expect(html().classList.contains('js')).toBe(true);

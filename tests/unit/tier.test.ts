@@ -15,6 +15,9 @@ const base: TierEnv = {
 };
 
 describe('initialTier', () => {
+  it('uses stills for the intentionally limited viewport', () => {
+    expect(initialTier({ ...base, viewportLimited: true })).toBe('low');
+  });
   it('returns high for a capable fine-pointer device', () => {
     expect(initialTier(base)).toBe('high');
   });

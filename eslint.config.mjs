@@ -16,6 +16,7 @@ const eslintConfig = defineConfig([
     ".lighthouseci/**",
     ".vitest/**",
     "build/**",
+    "art/**",
     "next-env.d.ts",
   ]),
 ]);

@@ -15,7 +15,7 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
   /* Spacing, 3xs to 4xl */
   --space-3xs: 4px;
@@ -69,25 +69,30 @@
   --z-tooltip: 600;
 
   /* Colour */
-  --color-paper: #1A0F0A;
-  --color-paper-2: #2A1A11;
+  --color-paper: #F7F1E8;
+  --color-paper-2: #FFF9F1;
   --color-paper-3: var(--color-paper-2);
-  --color-ink: #F4E8D8;
+  --color-ink: #29221F;
   --color-ink-2: var(--color-muted);
-  --color-muted: #BFA68C;
+  --color-muted: #71645B;
   --color-rule: color-mix(in oklab, var(--color-ink) 16%, var(--color-paper));
-  --color-accent: #E0953F;
-  --color-accent-ink: #1A0F0A;
-  --color-focus: var(--color-ink);
-  --color-error: #FF8A7A;
+  --color-accent: #8C2F39;
+  --color-accent-hover: #70232C;
+  --color-accent-ink: #F7F1E8;
+  --color-focus: #48603E;
+  --color-error: #A12622;
+  --color-pistachio: #D8E0C1;
+  --color-butter: #F1D58A;
+  --color-border: #D7C9BB;
+  --color-control: #89776A;
   --color-roast-light: #8C5A32;
   --color-roast-medium: #5E3820;
   --color-roast-dark: #2F1A0E;
   --color-milk: var(--color-ink);
 
   /* Fonts */
-  --font-display: "Fraunces", ui-serif, serif;
-  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Bricolage Fallback", sans-serif;
+  --font-body: "Instrument Sans", "Instrument Fallback", sans-serif;
   --font-outlier: var(--font-body);
 
   /* Radii and surfaces */
@@ -97,3 +102,8 @@
   --rule-hair: 1px;
   --shadow-card: none;
 }
+
+@font-face { font-family: "Bricolage Grotesque"; src: url("/fonts/bricolage-grotesque-latin.woff2") format("woff2"); font-style: normal; font-weight: 700 800; font-display: swap; }
+@font-face { font-family: "Instrument Sans"; src: url("/fonts/instrument-sans-latin.woff2") format("woff2"); font-style: normal; font-weight: 400 600; font-display: swap; }
+@font-face { font-family: "Bricolage Fallback"; src: local("Arial"); size-adjust: 101%; ascent-override: 92%; descent-override: 24%; line-gap-override: 0%; }
+@font-face { font-family: "Instrument Fallback"; src: local("Arial"); size-adjust: 99%; ascent-override: 98%; descent-override: 25%; line-gap-override: 0%; }

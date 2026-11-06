@@ -174,14 +174,21 @@ export async function runChecks(options: RunOptions = {}): Promise<AssetIssue[]>
   for (const stage of STAGES) {
     for (const crop of ['desktop', 'mobile'] as const) {
       for (const format of ['avif', 'webp'] as const) {
-        const publicPath = stillFile(stage.id as StageId, crop, format);
-        const onDisk = path.join(assetsDir, path.basename(publicPath));
-        if (isSymlink(onDisk)) {
-          issues.push({ file: publicPath, rule: 'missing', message: 'is a symlink, not a file' });
-        } else if (!isRegularFile(onDisk)) {
-          issues.push({ file: publicPath, rule: 'missing', message: 'required still is not present' });
+        const poster = stillFile(stage.id as StageId, crop, format);
+        for (const publicPath of [poster, poster.replace('/poster-', '/cup-')]) {
+          const onDisk = path.join(assetsDir, path.basename(publicPath));
+          if (isSymlink(onDisk)) {
+            issues.push({ file: publicPath, rule: 'missing', message: 'is a symlink, not a file' });
+          } else if (!isRegularFile(onDisk)) {
+            issues.push({ file: publicPath, rule: 'missing', message: 'required still is not present' });
+          }
         }
       }
+    }
+  }
+  for (const name of ['cup-s1-cup-320x400.avif', 'cup-s1-cup-320x400.webp', 'cup-s1-cup-480x600.avif', 'cup-s1-cup-480x600.webp', 'cup-s1-cup-800x1000.avif', 'cup-s1-cup-800x1000.webp', 'share-final-1200x630.webp']) {
+    if (!isRegularFile(path.join(assetsDir, name))) {
+      issues.push({ file: `/assets/${name}`, rule: 'missing', message: 'required responsive or share image is not present' });
     }
   }
   return issues;

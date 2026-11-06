@@ -1,15 +1,3 @@
-/* Hallmark · shape: one sticky film track, five stages, ending in the order panel · genre: atmospheric · theme: custom · job: buy · idea: "one cup made in front of you: scroll is the barista's hands, and the page ends where you pay" · vibe: "dark espresso, warm cream, one caramel light"
- * paper: oklch(18.2% 0.021 45.4) · accent: oklch(73.0% 0.134 66.2) · display: Fraunces · body: Inter (both by request, spec-supplied) · hero: stage 1 at first paint: the empty cup in macro sits right of centre; the head, one sentence and one action sit in the clear field to its left · nav: a fixed wordmark BREOU in Fraunces on the left, and one order button on the right · footer: one line holding the wordmark and the demo note · imagery: the product built, live 3D cup and placeholder stills from the same scene · signature: the scroll-driven live cup film in the sticky stage, with stage 1 on the first screen
- * axes: dark/roman-serif/warm · posture: restrained, accent on the price, the active option and the primary action · contrast: pass · fold: pass · v2.0.0 */
-/* Hallmark · pre-emit critique: P4 H4 E4 S3 R5 V4 · weakest: S, no brand voice or real facts supplied; copy uses only the spec's nouns and the film carries the page */
+/* Hallmark · shape: continuous cup journey · genre: cafe editorial · theme: Everyday Ritual; revised to DESIGN.md. */
 @import url("./tokens.css");
-@import url("./base.css");
-@import url("./layout.css");
-@import url("./stage.css");
-@import url("./caption.css");
-@import url("./panel.css");
-@import url("./drawer.css");
-@import url("./form.css");
-
-body { line-height: var(--leading-body); }
-html.has-motion { scroll-padding-top: 0; }
+@import url("./ritual.css");

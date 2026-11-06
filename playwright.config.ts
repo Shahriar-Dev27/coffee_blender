@@ -4,9 +4,13 @@ export default defineConfig({
   testDir: 'tests/e2e',
   use: {
     baseURL: 'http://127.0.0.1:3100',
+    channel: process.env.CI ? 'chromium' : 'chrome',
+    launchOptions: { args: ['--enable-unsafe-swiftshader'] },
   },
   webServer: {
-    command: 'npm run build && npm run start',
+    command: process.platform === 'win32'
+      ? 'npm.cmd run build && npm.cmd run start'
+      : 'npm run build && npm run start',
     url: 'http://127.0.0.1:3100',
     reuseExistingServer: !process.env.CI,
     timeout: 240000,

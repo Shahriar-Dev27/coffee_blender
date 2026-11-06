@@ -76,19 +76,19 @@ describe('checkBackground', () => {
   const four = (c: [number, number, number]): [number, number, number][] => [c, c, c, c];
 
   it('passes the exact paper colour in all four corners', () => {
-    expect(checkBackground(file, four([26, 15, 10]), paper)).toBeNull();
+    expect(checkBackground(file, four([247, 241, 232]), paper)).toBeNull();
   });
   it('flags black', () => {
     expect(checkBackground(file, four([0, 0, 0]), paper)?.rule).toBe('background');
   });
   it('flags a single bad corner', () => {
-    const corners = four([26, 15, 10]);
+    const corners = four([247, 241, 232]);
     corners[2] = [0, 0, 0];
     expect(checkBackground(file, corners, paper)?.rule).toBe('background');
   });
   it('honours the default tolerance of 2', () => {
-    expect(checkBackground(file, four([28, 15, 10]), paper)).toBeNull();
-    expect(checkBackground(file, four([29, 15, 10]), paper)?.rule).toBe('background');
+    expect(checkBackground(file, four([249, 241, 232]), paper)).toBeNull();
+    expect(checkBackground(file, four([250, 241, 232]), paper)?.rule).toBe('background');
   });
   it('flags a corner list of the wrong length', () => {
     expect(checkBackground(file, [[26, 15, 10]], paper)?.rule).toBe('background');
@@ -269,7 +269,7 @@ describe('runChecks pixel path', () => {
     const [issue] = byFile('poster-strip-64x64.png');
     expect(issue.rule).toBe('background');
     expect(issue.message).toContain('corner 1');
-    expect(issue.message).toContain('rgb(13,7.5,5)');
+    expect(issue.message).toContain('rgb(123.5,120.5,116)');
     expect(issue.message).toContain('more than 2');
   });
 
@@ -295,7 +295,7 @@ describe('runChecks pixel path', () => {
 
   it('reports only missing stills when the assets dir does not exist', async () => {
     const all = await runChecks({ assetsDir: path.join(dir, 'nope'), tokensPath });
-    expect(all).toHaveLength(20);
+    expect(all).toHaveLength(47);
     expect(all.every((i) => i.rule === 'missing')).toBe(true);
   });
 
@@ -314,7 +314,7 @@ describe('runChecks pixel path', () => {
     expect(hit).toHaveLength(1);
     expect(hit[0].rule).toBe('missing');
     expect(hit[0].message).toContain('symlink');
-    expect(all.filter((i) => i.rule === 'missing')).toHaveLength(20);
+    expect(all.filter((i) => i.rule === 'missing')).toHaveLength(47);
   });
 
   it('rejects a tokens file with no usable paper colour', async () => {

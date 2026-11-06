@@ -21,10 +21,10 @@ describe('design tokens', () => {
   const tokens = parseTokensCss(tokensCss);
 
   it('holds the locked palette and motion values', () => {
-    expect(tokens['--color-paper']).toBe('#1A0F0A');
-    expect(tokens['--color-accent']).toBe('#E0953F');
-    expect(tokens['--color-ink']).toBe('#F4E8D8');
-    expect(tokens['--color-error']).toBe('#FF8A7A');
+    expect(tokens['--color-paper']).toBe('#F7F1E8');
+    expect(tokens['--color-accent']).toBe('#8C2F39');
+    expect(tokens['--color-ink']).toBe('#29221F');
+    expect(tokens['--color-error']).toBe('#A12622');
     expect(tokens['--ease-out']).toBe('cubic-bezier(0.22, 1, 0.36, 1)');
     expect(tokens['--dur-stage-text']).toBe('900ms');
   });
