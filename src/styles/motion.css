@@ -1,0 +1,7 @@
+/* Cinematic motion layer. Inert unless Lenis (html.lenis) or the armed layer (html[data-motion]) is active. */
+
+/* Lenis 1.3.27 rules (dist/lenis.css), minus .lenis-stopped overflow: checkout already locks body scroll. */
+html.lenis, html.lenis body { height: auto; }
+html.lenis { scroll-behavior: auto; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-smooth iframe { pointer-events: none; }

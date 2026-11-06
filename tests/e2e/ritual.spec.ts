@@ -137,6 +137,7 @@ test('opening the header cart holds the cup at its current story pose', async ({
   await page.getByRole('link', { name: 'BREOU CAFFEE, back to the beginning' }).click();
   await page.locator('html[data-scene="ready"]').waitFor();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+  await expect(page.locator('html')).not.toHaveAttribute('data-motion', 'moving', { timeout: 10_000 });
   await page.waitForTimeout(600);
   await page.addStyleTag({ content: '.cart-dialog::backdrop { background: transparent; }' });
   const clip = { x: 0, y: 120, width: 700, height: 600 };
