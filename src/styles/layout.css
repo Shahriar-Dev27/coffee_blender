@@ -1,1 +1,77 @@
-/* layout: styles added by a later task */
+/* layout: skip link, fixed header, stage rail, buttons and the stacked (no-JS and Low tier) stage layout.
+   The motion layout (sticky track) is added in stage.css under html.has-motion. */
+
+:root { --header-h: 72px; }
+
+/* A way past the nav */
+.skip { position: absolute; left: var(--space-md); top: calc(-1 * var(--space-3xl)); z-index: var(--z-toast); display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--space-md); background: var(--color-ink); color: var(--color-paper); font: 500 var(--text-sm)/1 var(--font-body); text-decoration: none; border-radius: var(--radius-pill); }
+.skip:focus-visible { top: var(--space-sm); outline-color: var(--color-accent); }
+
+/* Buttons: default, hover, focus-visible, active, disabled, busy */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs); min-height: 48px; padding: 0 var(--space-lg); border: 1px solid transparent; border-radius: var(--radius-pill); font: 500 var(--text-md)/1 var(--font-body); white-space: nowrap; text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; transform: none; }
+.btn[aria-busy="true"] { cursor: progress; }
+.btn--primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-ink); }
+.btn--primary:hover:not(:disabled):not([aria-disabled="true"]) { background: color-mix(in oklab, var(--color-accent) 84%, var(--color-ink)); border-color: color-mix(in oklab, var(--color-accent) 84%, var(--color-ink)); }
+.btn--quiet { background: transparent; border-color: var(--color-muted); color: var(--color-ink); }
+.btn--quiet:hover:not(:disabled):not([aria-disabled="true"]) { background: var(--color-paper-2); border-color: var(--color-ink); }
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:active { transform: none; } }
+
+/* Fixed header */
+.site-header { position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-sticky-nav); background: color-mix(in oklab, var(--color-paper) 88%, transparent); }
+.site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); min-height: var(--header-h); }
+.wordmark { display: inline-flex; align-items: center; min-height: 44px; font: 600 var(--text-xl)/1 var(--font-display); color: var(--color-ink); text-decoration: none; }
+a.wordmark:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+/* Stage rail: bottom bar of ticks under 60rem, right-hand list from 60rem */
+.rail { position: fixed; z-index: var(--z-sticky); left: 50%; bottom: var(--space-sm); translate: -50% 0; padding-inline: var(--space-2xs); border-radius: var(--radius-pill); background: color-mix(in oklab, var(--color-paper) 88%, transparent); }
+.rail ol { display: flex; margin: 0; padding: 0; list-style: none; }
+.rail a { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; color: var(--color-muted); font: 400 var(--text-sm)/1 var(--font-body); text-decoration: none; transition: color var(--dur-short) var(--ease-out); }
+.rail a::before { content: ""; display: block; width: 24px; height: 2px; background: currentColor; }
+.rail a:hover, .rail a[aria-current="step"] { color: var(--color-ink); }
+.rail a[aria-current="step"]::before { transform: scaleY(2); }
+.rail a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.rail__name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.rail__progress { display: none; }
+@media (prefers-reduced-motion: reduce) { .rail a { transition: none; } }
+
+@media (min-width: 60rem) {
+  .rail { left: auto; right: var(--space-md); top: 50%; bottom: auto; translate: 0 -50%; padding: 0 var(--space-sm) 0 0; border-radius: 0; background: transparent; }
+  .rail ol { flex-direction: column; align-items: flex-end; }
+  .rail a { justify-content: flex-end; min-width: 0; padding-inline: var(--space-xs); }
+  .rail a::before { display: none; }
+  .rail a[aria-current="step"] { text-decoration: underline; text-underline-offset: 0.3em; }
+  .rail__name { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: nowrap; }
+  .rail::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 2px; background: var(--color-rule); }
+  .rail__progress { display: block; position: absolute; z-index: var(--z-base); top: 0; bottom: 0; right: 0; width: 2px; background: var(--color-accent); transform-origin: top; transform: scaleY(var(--progress, 0)); }
+}
+
+/* Stacked stage sections: normal flow, each still the full container width */
+main { padding-top: var(--header-h); }
+[data-stage-track] > section + section { margin-top: var(--space-2xl); }
+.stage__frame { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-md); }
+.still { display: block; }
+.still img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-2); color: var(--color-muted); border-radius: var(--radius-card); }
+@media (max-width: 40rem) { .still img { aspect-ratio: 4 / 5; } }
+
+.caption { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-sm); min-width: 0; }
+.caption h1 { font-size: var(--text-display-s); line-height: 1.05; letter-spacing: var(--tracking-display); }
+.caption h2 { font-size: var(--text-section); line-height: 1.05; letter-spacing: var(--tracking-display); }
+.caption__text { max-width: 36ch; font-size: var(--text-lead); line-height: 1.4; color: var(--color-ink); }
+.caption .btn { margin-top: var(--space-xs); }
+
+/* On wide screens the text sits in the left half, over the still's clear field */
+@media (min-width: 60rem) {
+  .stage__frame > .still, .stage__frame > .caption { grid-area: 1 / 1; }
+  .stage__frame > .caption { align-self: center; width: 50%; padding-inline: var(--space-xl); z-index: var(--z-base); }
+}
+
+.stage__order { margin-top: var(--space-xl); padding-block: var(--space-md); }
+.stage__order p { color: var(--color-muted); }
+
+.site-footer { margin-top: var(--section-gap-s); padding-block: var(--space-lg) calc(var(--space-lg) + 60px); border-top: 1px solid var(--color-rule); }
+.site-footer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-xs) var(--space-md); }
+.site-footer p { font-size: var(--text-sm); color: var(--color-muted); }
+@media (min-width: 60rem) { .site-footer { padding-bottom: var(--space-lg); } }
