@@ -1,0 +1,50 @@
+{
+  "name": "breou",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3100",
+    "build": "next build",
+    "start": "next start -p 3100",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "assets:check": "tsx scripts/assets/check-assets.ts",
+    "stills:capture": "tsx scripts/stills/capture.ts",
+    "fonts:copy": "tsx scripts/fonts/copy.ts",
+    "budget:js": "tsx scripts/perf/check-first-load-js.ts",
+    "lhci": "lhci autorun"
+  },
+  "dependencies": {
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.2",
+    "gsap": "3.15.1",
+    "next": "16.4.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "three": "0.187.0",
+    "zustand": "5.0.16"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@fontsource-variable/fraunces": "5.3.0",
+    "@fontsource-variable/inter": "5.3.0",
+    "@lhci/cli": "0.16.0",
+    "@playwright/test": "1.65.0",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.8",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/three": "0.187.0",
+    "@vitejs/plugin-react": "6.2.1",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.5",
+    "jsdom": "31.0.0",
+    "sharp": "0.35.5",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "5.1.0"
+  }
+}
