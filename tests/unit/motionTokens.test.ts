@@ -18,6 +18,21 @@ function ms(name: string): number {
 }
 
 describe('MOTION tokens match tokens.css', () => {
+  it('pins the whole MOTION object', () => {
+    expect(MOTION).toEqual({
+      ease: 'breou',
+      easeCss: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      feedback: 0.12,
+      ui: 0.24,
+      panel: 0.48,
+      stageText: 0.9,
+      scrub: 0.8,
+      wordStagger: 0.05,
+      lineStagger: 0.1,
+      magnetic: { duration: 0.45, maxScale: 1.02, strength: 0.3 },
+    });
+  });
+
   it('easeCss equals --ease-out', () => {
     expect(MOTION.easeCss).toBe(tokens['--ease-out']);
   });
@@ -55,15 +70,17 @@ describe('registerEases', () => {
     };
   }
 
+  // Same shape as the real gsap CustomEase: a class (typeof 'function') with a static create.
   function fakeCustomEase() {
     const created: Array<{ name: string; path: string }> = [];
-    return {
+    const CustomEase = function CustomEase() {};
+    return Object.assign(CustomEase, {
       created,
       create(name: string, path: string) {
         created.push({ name, path });
         return {};
       },
-    };
+    });
   }
 
   it('registers the plugin and creates the breou ease once, even when called twice', () => {

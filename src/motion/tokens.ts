@@ -24,12 +24,15 @@ export interface CustomEaseLike {
   create(name: string, path: string): unknown;
 }
 
-const registeredFor = new WeakSet<object>();
+// Guard keyed on both the gsap instance and the CustomEase plugin, so a second
+// pair of instances (e.g. a test reset) registers again while a repeat is a no-op.
+const registered = new WeakMap<object, WeakSet<object>>();
 
+// The real gsap CustomEase is a class (typeof 'function') with a static create.
 function isCustomEaseLike(value: unknown): value is CustomEaseLike {
+  const kind = typeof value;
   return (
-    typeof value === 'object' &&
-    value !== null &&
+    (kind === 'function' || (kind === 'object' && value !== null)) &&
     typeof (value as { create?: unknown }).create === 'function'
   );
 }
@@ -47,8 +50,13 @@ export function registerEases(
       'registerEases: CustomEase must be an object with a create(name, path) method',
     );
   }
-  if (registeredFor.has(gsap)) return;
+  let forGsap = registered.get(gsap);
+  if (!forGsap) {
+    forGsap = new WeakSet<object>();
+    registered.set(gsap, forGsap);
+  }
+  if (forGsap.has(CustomEase)) return;
   gsap.registerPlugin(CustomEase as Parameters<typeof gsap.registerPlugin>[0]);
   CustomEase.create(MOTION.ease, BREOU_PATH);
-  registeredFor.add(gsap);
+  forGsap.add(CustomEase);
 }
