@@ -2,7 +2,7 @@ import type { StageDef } from '../../src/config/stages';
 
 export type AssetIssue = {
   file: string;
-  rule: 'name' | 'dimensions' | 'budget' | 'background' | 'alt' | 'missing';
+  rule: 'name' | 'dimensions' | 'budget' | 'background' | 'alt' | 'missing' | 'unreadable';
   message: string;
 };
 
@@ -104,7 +104,14 @@ function parseHex(hex: string): [number, number, number] | null {
   return null;
 }
 
-/** `cornerMeans` is the mean RGB of the four corner regions (any order). */
+/**
+ * `cornerMeans` is the mean RGB of the four corner regions (any order).
+ *
+ * The default tolerance of 2 absorbs lossy-encoder drift on a flat #1A0F0A fill
+ * (measured with sharp 0.35.5: AVIF q40-60 drifts 1.0, JPEG q>=80 1.0, WebP q75 2.0,
+ * q85 1.5, q90 1.0, q60 3.0). WebP fallbacks must be encoded at quality >= 85 (or
+ * nearLossless); do not raise the global tolerance.
+ */
 export function checkBackground(
   file: string,
   cornerMeans: [number, number, number][],

@@ -40,43 +40,70 @@ function extOf(file: string): string {
   return path.extname(file).slice(1).toLowerCase();
 }
 
-/** Mean RGB of each of the four 8x8 corners, plus whether any corner pixel is not fully opaque. */
-async function sampleCorners(
-  file: string,
+/** Only the stills and the share image are flat composites on the paper colour. */
+const BACKGROUND_FILE = /^(?:poster|share)-/;
+
+/** True only for a regular file; a symlink (even to a file) is not one. */
+export function isRegularFile(p: string): boolean {
+  try {
+    return fs.lstatSync(p).isFile();
+  } catch {
+    return false;
+  }
+}
+
+function isSymlink(p: string): boolean {
+  try {
+    return fs.lstatSync(p).isSymbolicLink();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Mean RGB of each of the four corners (up to 8x8, smaller for tiny images), read from one
+ * decoded RGBA buffer, plus the number of pixels that are not fully opaque anywhere in the image.
+ */
+function analysePixels(
+  data: Buffer,
   width: number,
   height: number,
-): Promise<{ means: [number, number, number][]; transparent: boolean }> {
+): { means: [number, number, number][]; translucent: number } {
+  const cw = Math.min(CORNER, width);
+  const ch = Math.min(CORNER, height);
   const origins: [number, number][] = [
     [0, 0],
-    [width - CORNER, 0],
-    [0, height - CORNER],
-    [width - CORNER, height - CORNER],
+    [width - cw, 0],
+    [0, height - ch],
+    [width - cw, height - ch],
   ];
-  const means: [number, number, number][] = [];
-  let transparent = false;
-  for (const [left, top] of origins) {
-    const { data } = await sharp(file)
-      .extract({ left, top, width: CORNER, height: CORNER })
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
+  const means = origins.map(([left, top]) => {
     const sum = [0, 0, 0];
-    const pixels = CORNER * CORNER;
-    for (let p = 0; p < pixels; p++) {
-      sum[0] += data[p * 4];
-      sum[1] += data[p * 4 + 1];
-      sum[2] += data[p * 4 + 2];
-      if (data[p * 4 + 3] < 255) transparent = true;
+    for (let y = top; y < top + ch; y++) {
+      for (let x = left; x < left + cw; x++) {
+        const i = (y * width + x) * 4;
+        sum[0] += data[i];
+        sum[1] += data[i + 1];
+        sum[2] += data[i + 2];
+      }
     }
-    means.push([sum[0] / pixels, sum[1] / pixels, sum[2] / pixels]);
+    const n = cw * ch;
+    return [sum[0] / n, sum[1] / n, sum[2] / n] as [number, number, number];
+  });
+  let translucent = 0;
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] < 255) translucent++;
   }
-  return { means, transparent };
+  return { means, translucent };
 }
 
 export async function runChecks(options: RunOptions = {}): Promise<AssetIssue[]> {
   const assetsDir = options.assetsDir ?? path.join(ROOT, 'public', 'assets');
   const tokensPath = options.tokensPath ?? path.join(ROOT, 'src', 'styles', 'tokens.css');
   const paper = parseTokensCss(fs.readFileSync(tokensPath, 'utf8'))['--color-paper'];
+  if (typeof paper !== 'string' || !/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(paper)) {
+    throw new Error(`--color-paper in ${tokensPath} is missing or not a hex colour: ${String(paper)}`);
+  }
   const issues: AssetIssue[] = [];
 
   issues.push(...checkAlt(STAGES));
@@ -84,42 +111,60 @@ export async function runChecks(options: RunOptions = {}): Promise<AssetIssue[]>
   let glbBytes = 0;
   let ktx2Bytes = 0;
   for (const full of walk(assetsDir)) {
-    const rel = path.relative(assetsDir, full).split(path.sep).join('/');
+    const name = `/assets/${path.relative(assetsDir, full).split(path.sep).join('/')}`;
     const ext = extOf(full);
     const bytes = fs.statSync(full).size;
     const push = (issue: AssetIssue | null) => {
       if (issue) issues.push(issue);
     };
 
-    push(checkName(rel));
-    push(checkBudget(rel, bytes));
+    push(checkName(name));
+    push(checkBudget(name, bytes));
     if (ext === 'glb') glbBytes += bytes;
     if (ext === 'ktx2') ktx2Bytes += bytes;
     if (!IMAGE_EXT.has(ext)) continue;
 
+    const wantsBackground = BACKGROUND_FILE.test(path.basename(full));
+    let width: number;
+    let height: number;
+    let pixels: Buffer | null = null;
     try {
-      const { width, height } = await sharp(full).metadata();
-      if (!width || !height) throw new Error('no dimensions');
-      push(checkDimensions(rel, { width, height }));
-      // Every image is a flat composite over the paper colour, so all corners must equal --bg.
-      if (width >= CORNER && height >= CORNER) {
-        const { means, transparent } = await sampleCorners(full, width, height);
-        if (transparent) {
-          issues.push({
-            file: rel,
-            rule: 'background',
-            message: 'has transparent pixels in a corner; stills must be opaque on the paper colour',
-          });
-        } else {
-          push(checkBackground(rel, means, paper));
+      const meta = await sharp(full).metadata();
+      if (!meta.width || !meta.height) throw new Error('no dimensions');
+      width = meta.width;
+      height = meta.height;
+      if (wantsBackground) {
+        const { data, info } = await sharp(full)
+          .ensureAlpha()
+          .toColourspace('srgb')
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+        if (info.channels !== 4 || info.width !== width || info.height !== height) {
+          throw new Error(`unexpected decode result (${info.width}x${info.height}x${info.channels})`);
         }
+        pixels = data;
       }
     } catch (error) {
       issues.push({
-        file: rel,
-        rule: 'dimensions',
+        file: name,
+        rule: 'unreadable',
         message: `unreadable image (${error instanceof Error ? error.message : 'unknown error'})`,
       });
+      continue;
+    }
+
+    push(checkDimensions(name, { width, height }));
+    if (pixels) {
+      const { means, translucent } = analysePixels(pixels, width, height);
+      if (translucent > 0) {
+        issues.push({
+          file: name,
+          rule: 'background',
+          message: `${translucent} pixel(s) are not fully opaque; stills must be opaque on the paper colour`,
+        });
+      } else {
+        push(checkBackground(name, means, paper));
+      }
     }
   }
   issues.push(...[checkTotalBudget('glb', glbBytes), checkTotalBudget('ktx2', ktx2Bytes)].filter(
@@ -130,7 +175,10 @@ export async function runChecks(options: RunOptions = {}): Promise<AssetIssue[]>
     for (const crop of ['desktop', 'mobile'] as const) {
       for (const format of ['avif', 'webp'] as const) {
         const publicPath = stillFile(stage.id as StageId, crop, format);
-        if (!fs.existsSync(path.join(assetsDir, path.basename(publicPath)))) {
+        const onDisk = path.join(assetsDir, path.basename(publicPath));
+        if (isSymlink(onDisk)) {
+          issues.push({ file: publicPath, rule: 'missing', message: 'is a symlink, not a file' });
+        } else if (!isRegularFile(onDisk)) {
           issues.push({ file: publicPath, rule: 'missing', message: 'required still is not present' });
         }
       }
