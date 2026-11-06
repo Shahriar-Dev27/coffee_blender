@@ -2,10 +2,11 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Environment, Lightformer } from '@react-three/drei';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CatmullRomCurve3, Color, Group, InstancedMesh, MathUtils, Mesh, MeshPhysicalMaterial, Object3D, Vector2, Vector3 } from 'three';
+import { CatmullRomCurve3, Color, Group, InstancedMesh, Mesh, MeshPhysicalMaterial, Object3D, Vector2, Vector3 } from 'three';
 import { storyProgress } from '@/motion/progress';
 import { orderStore } from '@/order/store';
 import { poseAt } from './director';
+import { dampSettled } from './settle';
 import { brandTexture, coffeeTexture, steamTexture } from './textures';
 import { createFrameBudget } from '@/lib/tier';
 interface Props { onReady(): void; onFailure(): void; }
@@ -66,7 +67,7 @@ function Director({ onReady, onFailure, low, onSlow }: Props & { low: boolean; o
   camera.position.set(0, pose.cameraY, capture && size.width < size.height ? pose.cameraZ + 4 : mobile ? 11 : pose.cameraZ);
   camera.lookAt(0, .1, 0);
   targetMilk.current = state.selection.milk === 'none' ? 0 : pose.milk;
-  milkValue.current = first.current || capture ? targetMilk.current : MathUtils.damp(milkValue.current, targetMilk.current, 10, Math.min(dt, .05));
+  milkValue.current = first.current || capture ? targetMilk.current : dampSettled(milkValue.current, targetMilk.current, 10, Math.min(dt, .05));
   const milk = milkValue.current;
   if (liquid.current) {
    liquid.current.visible = pose.fill > .02;
@@ -134,7 +135,7 @@ function Director({ onReady, onFailure, low, onSlow }: Props & { low: boolean; o
   sampling.current = rendering;
   lastFrame.current = now;
   lastProgress.current = p;
-  if ((moving || steaming || Math.abs(milk - targetMilk.current) > .001) && !state.drawer) invalidate();
+  if ((moving || steaming || milk !== targetMilk.current) && !state.drawer) invalidate();
   if (first.current) { first.current = false; requestAnimationFrame(onReady); }
  });
  return <>

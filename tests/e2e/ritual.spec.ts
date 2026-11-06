@@ -1,5 +1,32 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import type { Page } from '@playwright/test';
+
+/**
+ * Counts pixels whose channels differ by more than `tolerance` between two PNG screenshots. Decoded in
+ * the page (createImageBitmap + canvas) so no image dependency is needed. The software WebGL renderer
+ * can flip a handful of pixels by 1-2 levels between redraws of identical state; a real pose change
+ * moves thousands of pixels by far more than that.
+ */
+async function countChangedPixels(page: Page, a: Buffer, b: Buffer, tolerance = 4): Promise<number> {
+  return page.evaluate(async ({ a64, b64, tol }) => {
+    const decode = async (base64: string) => {
+      const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+      const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }), { colorSpaceConversion: 'none' });
+      const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+      const context = canvas.getContext('2d')!;
+      context.drawImage(bitmap, 0, 0);
+      return context.getImageData(0, 0, bitmap.width, bitmap.height);
+    };
+    const [first, second] = await Promise.all([decode(a64), decode(b64)]);
+    if (first.width !== second.width || first.height !== second.height) throw new Error('screenshot size mismatch');
+    let changed = 0;
+    for (let i = 0; i < first.data.length; i += 4) {
+      if (Math.abs(first.data[i] - second.data[i]) > tol || Math.abs(first.data[i + 1] - second.data[i + 1]) > tol || Math.abs(first.data[i + 2] - second.data[i + 2]) > tol) changed++;
+    }
+    return changed;
+  }, { a64: a.toString('base64'), b64: b.toString('base64'), tol: tolerance });
+}
 
 test('skip directly to the counter and complete a keyboard demo order', async ({ page }) => {
   await page.goto('/');
@@ -145,7 +172,21 @@ test('opening the header cart holds the cup at its current story pose', async ({
   await page.getByRole('button', { name: 'Review order, 1 cup', exact: true }).click();
   await page.waitForTimeout(500);
   const during = await page.screenshot({ clip });
-  expect(during.equals(before)).toBe(true);
+  // Tolerant on purpose: redrawing identical state can flip a few pixels by 1-2 levels in the software renderer.
+  expect(await countChangedPixels(page, before, during)).toBeLessThan(50);
+
+  // Negative control: the same metric must flag a genuinely different story pose (canvas isolated from the DOM).
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await page.addStyleTag({ content: '* { visibility: hidden !important; } .scene-canvas, .scene-canvas * { visibility: visible !important; }' });
+  await page.waitForTimeout(600);
+  const poseA = await page.screenshot({ clip });
+  await page.locator('#pour').scrollIntoViewIfNeeded();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(500);
+  await expect(page.locator('html')).not.toHaveAttribute('data-motion', 'moving', { timeout: 10_000 });
+  await page.waitForTimeout(600);
+  const poseB = await page.screenshot({ clip });
+  expect(await countChangedPixels(page, poseA, poseB)).toBeGreaterThan(500);
 });
 
 test('an accepted long pickup name wraps inside the narrow receipt', async ({ page }) => {
