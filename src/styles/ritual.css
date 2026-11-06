@@ -260,3 +260,9 @@ html[data-capture="true"] .scene-layer { display: block !important; visibility: 
  .hero { min-height: 800px; } .chapter { min-height: 800px; } .scene-layer { display: none; }
  html[data-scene="ready"] .chapter .still { visibility: visible; }
 }
+
+/* RevealHeading: one block per authored line, inline-block words. The bottom padding that keeps
+   descenders inside a reveal mask is cancelled by the equal negative margin (layout-neutral). */
+.reveal-lines, .reveal-line { display: block; }
+.reveal-line { padding-bottom: .08em; margin-bottom: -.08em; }
+.reveal-word { display: inline-block; }

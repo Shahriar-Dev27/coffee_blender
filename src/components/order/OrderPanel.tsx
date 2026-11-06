@@ -15,7 +15,7 @@ export function OrderPanel() {
   const [notice, setNotice] = useState('');
   const recipe = recipeById(recipeId);
   const choose = <K extends OptionKey>(key: K, value: Selection[K]) => { orderStore.getState().choose(key, value); setNotice(''); };
-  return <div className="order-panel">
+  return <div className="order-panel" data-reveal="card">
     <fieldset disabled={pending} className="recipe-choices"><legend className="field-legend">01 <span>Find your favorite</span></legend>
       {RECIPES.map((item) => <label className="recipe-choice" key={item.id}>
         <input type="radio" name="recipe" value={item.id} checked={recipeId === item.id} onChange={() => { orderStore.getState().chooseRecipe(item.id); setNotice(''); }} />
