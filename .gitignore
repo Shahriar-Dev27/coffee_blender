@@ -1,5 +1,4 @@
 # dependencies
-/node_modules
 node_modules/
 /.pnp
 .pnp.*
@@ -10,16 +9,14 @@ node_modules/
 !.yarn/versions
 
 # testing
-/coverage
 coverage/
 playwright-report/
 test-results/
 .lighthouseci/
+.vitest/
 
 # next.js
-/.next/
 .next/
-/out/
 out/
 
 # production
