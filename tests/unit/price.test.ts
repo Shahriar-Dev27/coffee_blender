@@ -141,6 +141,28 @@ describe('formatCents', () => {
     expect(formatCents(1400)).toBe('$14.00');
     expect(formatCents(350)).toBe('$3.50');
   });
+
+  it('pins rounding and zero display', () => {
+    expect(formatCents(5)).toBe('$0.05');
+    expect(formatCents(1005)).toBe('$10.05');
+    expect(formatCents(0)).toBe('$0.00');
+  });
+
+  it('formats negatives with an ASCII hyphen-minus first', () => {
+    const out = formatCents(-50);
+    expect(out).toBe('-$0.50');
+    expect(out.charCodeAt(0)).toBe(0x2d);
+  });
+
+  it('normalises negative zero to $0.00', () => {
+    expect(formatCents(-0)).toBe('$0.00');
+  });
+
+  it('throws RangeError on non-finite input', () => {
+    expect(() => formatCents(NaN)).toThrow(RangeError);
+    expect(() => formatCents(Infinity)).toThrow(RangeError);
+    expect(() => formatCents(-Infinity)).toThrow(RangeError);
+  });
 });
 
 describe('formatDeltaCents', () => {
@@ -149,11 +171,24 @@ describe('formatDeltaCents', () => {
   });
 
   it('prefixes negative deltas with -', () => {
-    expect(formatDeltaCents(-50)).toBe('-$0.50');
+    const out = formatDeltaCents(-50);
+    expect(out).toBe('-$0.50');
+    expect(out.charCodeAt(0)).toBe(0x2d);
   });
 
   it('returns an empty string for a zero delta', () => {
     expect(formatDeltaCents(0)).toBe('');
+  });
+
+  it('returns an empty string for negative zero and sub-cent deltas that round to zero', () => {
+    expect(formatDeltaCents(-0)).toBe('');
+    expect(formatDeltaCents(-0.4)).toBe('');
+  });
+
+  it('throws RangeError on non-finite input', () => {
+    expect(() => formatDeltaCents(NaN)).toThrow(RangeError);
+    expect(() => formatDeltaCents(Infinity)).toThrow(RangeError);
+    expect(() => formatDeltaCents(-Infinity)).toThrow(RangeError);
   });
 });
 
@@ -178,5 +213,25 @@ describe('describeSelection', () => {
 
   it('omits milk and sweetener when they are None', () => {
     expect(describeSelection(CHEAPEST)).toBe('Small House Blend, light roast');
+  });
+
+  it('throws RangeError for an unknown id', () => {
+    expect(() =>
+      describeSelection({ ...DEFAULT_SELECTION, size: 'jumbo' as Selection['size'] }),
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError when a None-valued key is replaced with an unknown id', () => {
+    expect(DEFAULT_SELECTION.milk).toBe('none');
+    expect(DEFAULT_SELECTION.sweetener).toBe('none');
+    expect(() =>
+      describeSelection({ ...DEFAULT_SELECTION, milk: 'nope' as Selection['milk'] }),
+    ).toThrow(RangeError);
+    expect(() =>
+      describeSelection({
+        ...DEFAULT_SELECTION,
+        sweetener: 'nope' as Selection['sweetener'],
+      }),
+    ).toThrow(RangeError);
   });
 });
