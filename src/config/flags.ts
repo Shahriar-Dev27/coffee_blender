@@ -1,5 +1,6 @@
 // Feature flags. Each flag is a compile-time constant.
 
 export const FLAGS = {
-  smoothScroll: false,
+  /** Lenis wheel smoothing on the desktop motion tier. false = native wheel scrolling, everything else unchanged. */
+  smoothScroll: true,
 } as const;

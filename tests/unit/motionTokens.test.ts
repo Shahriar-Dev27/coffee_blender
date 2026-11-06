@@ -54,8 +54,8 @@ describe('MOTION tokens match tokens.css', () => {
 });
 
 describe('FLAGS', () => {
-  it('smoothScroll is disabled', () => {
-    expect(FLAGS.smoothScroll).toBe(false);
+  it('smoothScroll is enabled (user-approved Lenis layer; set false to restore native wheel scrolling)', () => {
+    expect(FLAGS.smoothScroll).toBe(true);
   });
 });
 
