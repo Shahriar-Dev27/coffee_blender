@@ -104,6 +104,30 @@ describe('createFrameBudget', () => {
     for (; t < 6000; t += 16) expect(b.push(16, t)).toBe('ok');
   });
 
+  it.each([
+    ['NaN frameMs', Number.NaN, 0],
+    ['Infinity frameMs', Number.POSITIVE_INFINITY, 0],
+    ['negative frameMs', -5, 0],
+    ['NaN nowMs', 40, Number.NaN],
+    ['Infinity nowMs', 40, Number.POSITIVE_INFINITY],
+  ])('ignores bad input (%s) without poisoning later behaviour', (_name, frameMs, nowMs) => {
+    const b = createFrameBudget();
+    expect(b.push(frameMs, nowMs)).toBe('ok');
+    const steps: number[] = [];
+    for (let t = 0; t <= 2000; t += 40) if (b.push(40, t) === 'stepDown') steps.push(t);
+    expect(steps).toEqual([2000]);
+  });
+
+  it('resets when the clock goes backwards', () => {
+    const b = createFrameBudget();
+    for (let t = 1000; t < 2900; t += 40) b.push(40, t);
+    // Clock jumps back: prior breach must not count.
+    expect(b.push(40, 0)).toBe('ok');
+    const steps: number[] = [];
+    for (let t = 40; t <= 2000; t += 40) if (b.push(40, t) === 'stepDown') steps.push(t);
+    expect(steps).toEqual([2000]);
+  });
+
   it('reset() clears state', () => {
     const b = createFrameBudget();
     for (let t = 0; t < 1900; t += 40) b.push(40, t);

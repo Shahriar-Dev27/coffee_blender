@@ -59,6 +59,9 @@ export function createFrameBudget(opts: { thresholdMs?: number; windowMs?: numbe
   }
 
   function push(frameMs: number, nowMs: number): 'ok' | 'stepDown' {
+    if (!Number.isFinite(frameMs) || !Number.isFinite(nowMs) || frameMs < 0) return 'ok';
+    // A clock that goes backwards invalidates the window; start over.
+    if (samples.length > 0 && nowMs < samples[samples.length - 1].at) reset();
     samples.push({ ms: frameMs, at: nowMs });
     while (samples.length > 0 && nowMs - samples[0].at > windowMs) samples.shift();
 

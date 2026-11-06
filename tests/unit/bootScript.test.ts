@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BOOT_SCRIPT } from '@/lib/bootScript';
 import { initialTier, type TierEnv } from '@/lib/tier';
@@ -12,6 +14,12 @@ interface Stub {
   hardwareConcurrency?: number;
 }
 
+const loseContext = vi.fn();
+const gl = {
+  getExtension: (name: string) => (name === 'WEBGL_lose_context' ? { loseContext } : null),
+};
+let getContextSpy: ReturnType<typeof vi.spyOn>;
+
 function runWith(stub: Stub): void {
   vi.stubGlobal(
     'matchMedia',
@@ -24,9 +32,9 @@ function runWith(stub: Stub): void {
     deviceMemory: stub.deviceMemory,
     hardwareConcurrency: stub.hardwareConcurrency,
   });
-  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(((kind: string) => {
+  getContextSpy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(((kind: string) => {
     if (stub.webgl === 'throw') throw new Error('no canvas');
-    return stub.webgl && (kind === 'webgl2' || kind === 'webgl') ? {} : null;
+    return stub.webgl && (kind === 'webgl2' || kind === 'webgl') ? gl : null;
   }) as never);
   // Evaluate exactly as the browser would: a classic inline script.
   new Function(BOOT_SCRIPT)();
@@ -40,6 +48,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  loseContext.mockClear();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -85,9 +94,49 @@ describe('BOOT_SCRIPT', () => {
     expect(html().dataset.tier).toBe('low');
   });
 
+  it('does not create a WebGL context when reduced motion is on', () => {
+    runWith({ reducedMotion: true, webgl: true });
+    expect(getContextSpy).not.toHaveBeenCalled();
+    expect(loseContext).not.toHaveBeenCalled();
+  });
+
+  it('does not create a WebGL context on low-end devices', () => {
+    runWith({ deviceMemory: 2, webgl: true });
+    expect(getContextSpy).not.toHaveBeenCalled();
+    runWith({ saveData: true, webgl: true });
+    expect(getContextSpy).not.toHaveBeenCalled();
+    runWith({ hardwareConcurrency: 2, webgl: true });
+    expect(getContextSpy).not.toHaveBeenCalled();
+  });
+
+  it('releases the probe context after a successful probe', () => {
+    runWith({ webgl: true });
+    expect(getContextSpy).toHaveBeenCalled();
+    expect(loseContext).toHaveBeenCalledTimes(1);
+    expect(html().dataset.tier).toBe('high');
+  });
+
   it('is a static string with no template placeholders or dangerous APIs', () => {
+    expect(BOOT_SCRIPT).toMatch(/^[ -~]*$/);
     expect(BOOT_SCRIPT).not.toMatch(/\$\{/);
-    expect(BOOT_SCRIPT).not.toMatch(/eval|Function\(|fetch|XMLHttpRequest|localStorage|sessionStorage|document\.cookie|<\/script/);
+    expect(BOOT_SCRIPT).not.toMatch(/`/);
+    const banned = [
+      'eval', 'Function(', 'fetch', 'XMLHttpRequest', 'localStorage', 'sessionStorage',
+      'document.cookie', '</script', '<script', '<!--', 'document.write', 'innerHTML',
+      'outerHTML', 'WebSocket', 'sendBeacon', 'indexedDB', 'postMessage', 'location',
+      'setTimeout', 'setInterval', 'import',
+    ];
+    for (const token of banned) expect(BOOT_SCRIPT, token).not.toContain(token);
+  });
+
+  it('source builds BOOT_SCRIPT only from string literals joined with +', () => {
+    const src = readFileSync(resolve(process.cwd(), 'src/lib/bootScript.ts'), 'utf8');
+    const m = /export const BOOT_SCRIPT =([\s\S]*?);\s*$/.exec(src);
+    expect(m).not.toBeNull();
+    const expr = m![1];
+    // Strip every single-quoted literal; only whitespace and + may remain.
+    const rest = expr.replace(/'(?:[^'\\\n]|\\.)*'/g, '');
+    expect(rest).toMatch(/^[\s+]*$/);
   });
 
   it('agrees with initialTier across a table of environments', () => {
