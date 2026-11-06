@@ -46,3 +46,6 @@ next-env.d.ts
 .agency/
 .hallmark/
 /art
+
+# local design specification
+/BREOU Cinematic Coffee Storefront, Design Spec.md
